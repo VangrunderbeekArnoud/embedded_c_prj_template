@@ -12,7 +12,7 @@ COMMON_DIR			= common
 APP_DIR				= app
 
 # OBJECTS
-OBJS_COMMON			= log.o version.o
+OBJS_COMMON			= log.o version.o argparse.o
 OBJS_APP				= app.o
 
 OBJS 					= $(addprefix $(COMMON_DIR)/, $(OBJS_COMMON))\
@@ -36,6 +36,13 @@ APP_CONFIG_FILE	= app.cfg
 # RELEASE NAME
 RELEASE_NAME		= main
 
+# VERSION SPECIFICS
+MAJ_VER=0
+MIN_VER=0
+DEV_VER=1
+BUILD_NUMBER=$$(date +'%y%m%d%H%M')
+BUILD_DATE=$$(date +'%Y.%m.%d')
+
 # TARGETS
 TARGET_REL_PATH	= ../build/release
 TARGET_DEB_PATH 	= ../build/debug
@@ -53,6 +60,9 @@ LINKER				= gcc
 
 # CFLAGS
 CFLAGS				= -c -Wall -D_GNU_SOURCE
+CFLAGS				+= -DMAJ_VER=$(MAJ_VER) -DMIN_VER=$(MIN_VER) -DDEV_VER=$(DEV_VER) 
+CFLAGS				+= -DBUILD_DATE=$(BUILD_DATE) -DBUILD_NUMBER=$(BUILD_NUMBER)
+
 
 # RULES FOR GENERATING DEPENDENCIES
 $(DEPS_PATH)/%.d: %.c

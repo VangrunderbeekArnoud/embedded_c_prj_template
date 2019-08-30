@@ -9,6 +9,32 @@
  * @endcode
  */
 
+#define xstr(s) str(s)
+#define str(s) #s
+
+#ifndef MAJ_VER
+#define MAJ_VER 00
+#endif
+#ifndef MIN_VER
+#define MIN_VER 00
+#endif
+#ifndef DEV_VER
+#define DEV_VER 00
+#endif
+#ifndef SVN_VER
+#define SVN_VER unknown
+#endif
+#ifndef SVN_BRANCH
+#define SVN_BRANCH unknown
+#endif
+#ifndef BUILD_NUMBER
+#define BUILD_NUMBER unknown
+#endif
+#ifndef BUILD_DATE
+#define BUILD_DATE unknown
+#endif
+
+
 /* ----------------------------------------------------------------------
  * include section
  * ----------------------------------------------------------------------*/
@@ -22,9 +48,14 @@
  * macro declaration section
  * ----------------------------------------------------------------------*/
 
-#define VER_MAJ (0) /**< The major version value */
-#define VER_MIN (0)  /**< The minor version value */
-#define VER_DEV (0) /**< The development version value */
+const volatile static int maj_ver = MAJ_VER;
+const volatile static int min_ver = MIN_VER;
+const volatile static int dev_ver = DEV_VER;
+const static char* svn_ver = xstr(SVN_VER);
+const static char* svn_branch = xstr(SVN_BRANCH);
+const static char* build_number = xstr(BUILD_NUMBER);
+const static char* build_date = xstr(BUILD_DATE);
+
 
 /* ----------------------------------------------------------------------
  * type declaration section

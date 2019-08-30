@@ -35,8 +35,9 @@
 
 /* log debug bits values - only used in DEBUG log level */
 #define LOGBIT_UNDEFINED (0x0000L) /**< DO NOT USE */
-#define LOGBIT_TCPIPSRV  (0x0001L) /**< TCP-IP Server details */
-#define LOGBIT_APPTCPIP   (0x0002L) /**< APP TCP-IP details */
+#define LOGBIT_DEFAULT 	 (0x0001L) /**< default */
+#define LOGBIT_DEBUG  	 (0x0002L) /**< debug */
+#define LOGBIT_TEST		 (0x0003L) /**< test */
 #define LOGBIT_DIAFSM    (0x0004L) /**< APP Diaser Messaging FSM details */
 #define LOGBIT_DIAMSGS   (0x0008L) /**< Diaser messages details */
 #define LOGBIT_STVAL     (0x0010L) /**< Structure validation details */

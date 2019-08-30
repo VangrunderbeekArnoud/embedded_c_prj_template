@@ -19,16 +19,40 @@
 /* module specific includes (skeleton) - if possible alphabetically ordered */
 
 /* component include */
-#include "version_t.h"
 
 /* ----------------------------------------------------------------------
  * function declaration section
  * ----------------------------------------------------------------------*/
 
 /**
- * @brief Print the IG software version to the log console
+ * @brief extensive print of the app version
  */
-void APPVER_PrintVersion(void);
+void APPVER_PrintVersion();
+/**
+ * @brief brief print of the app version
+ */
+void APPVER_PrintSoftwareVersion();
+/**
+ * @brief prints the svn version number
+ */
+void APPVER_PrintSvnVersion();
+/**
+ * @brief prints the current svn branch
+ */
+void APPVER_PrintSvnBranch();
+/**
+ * @brief prints the current build number
+ */
+void APPVER_PrintBuildNumber();
+/**
+ * @brief prints the current build date
+ */
+void APPVER_PrintBuildDate();
+/**
+ * @brief compile version number
+ * @return char* to the brief app version
+ */
+char* APPVER_GetSoftwareVersion();
 
 /* ----------------------------------------------------------------------
  * exported variables declaration section

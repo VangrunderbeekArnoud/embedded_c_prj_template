@@ -34,16 +34,7 @@
 #define APPLOG_DEFAULT_LEVEL_BITS (LOGLV_INFO |  LOGLV_DEBUG | LOGLV_WARNING | LOGLV_ERROR | LOGLV_CRITICAL | LOGLV_TEST)
 
 /** The default debug bits combination */
-#define APPLOG_DEFAULT_DEBUG_BITS (	/*LOGBIT_STVAL  |*/      \
-									/*LOGBIT_DIAFSM |*/      \
-									LOGBIT_DIAMSGS  |        \
-									/* LOGBIT_FSMEN    | */  \
-									LOGBIT_MEMALLOC |        \
-									/*LOGBIT_TCPIPSRV | */   \
-									/* LOGBIT_CONNDICT | */  \
-									LOGBIT_CMDBR    |        \
-									LOGBIT_OCCLI    |        \
-									LOGBIT_OCSRV)
+#define APPLOG_DEFAULT_DEBUG_BITS (	LOGBIT_UNDEFINED);
 
 #define ANSI_COLOR_RED     "\x1b[91m"
 #define ANSI_COLOR_GREEN   "\x1b[92m"
@@ -171,7 +162,6 @@ bool APPLOG_Breakdown(void)
 
 		APPLOG_is_init = false;
 	}
-
 	return rv;
 }
 
