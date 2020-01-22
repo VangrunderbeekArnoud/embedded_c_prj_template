@@ -12,7 +12,7 @@ COMMON_DIR			= common
 APP_DIR				= app
 
 # OBJECTS
-OBJS_COMMON			= log.o version.o argparse.o
+OBJS_COMMON			= log.o version.o argparse.o config.o timers.o
 OBJS_APP				= app.o
 
 OBJS 					= $(addprefix $(COMMON_DIR)/, $(OBJS_COMMON))\
@@ -21,7 +21,7 @@ OBJS 					= $(addprefix $(COMMON_DIR)/, $(OBJS_COMMON))\
 OBJS_NO_PATH		= $(OBJS_COMMON) $(OBJS_APP)
 
 # LIBRARIES
-LIBS					= -lpthread
+LIBS					= -lpthread -lrt
 LIBS_PATH			= /usr/lib/gcc/i686-redhat-linux/9/include
 
 # OBJECTS ROOT PATH

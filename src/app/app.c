@@ -17,9 +17,13 @@
 /* project specific includes - if possible alphabetically ordered */
 #include "../common/log.h"
 #include "../common/argparse.h"
+#include "../common/config.h"
 
 /* module specific includes - if possible alphabetically ordered */
 #include "../common/version.h"
+#include "../common/timers.h"
+
+timer_t p_timer_id;
 
 /**
  * @brief Signal handler that terminates the application.
@@ -62,6 +66,36 @@ void parser(int argc, const char** argv)
 		APPLOG_SetLogBits(LOGBIT_DEBUG);
 }
 
+void ReadConfig()
+{
+	const char* filename = "config.cfg";
+	const char* string_param = "STRING_PARAM";
+	const char* numeric_param = "NUMERIC_PARAM";
+
+	char out_str_value[200];
+	int out_num_value;
+
+	if (APPCFG_GetConfigParamFromFile(filename, string_param, out_str_value, sizeof(out_str_value))) {
+		APPLOG_Log(__FUNCTION__, LOGLV_ERROR, "Failed retreiving %s from %s", string_param, filename);
+	}
+	else {
+		APPLOG_Log(__FUNCTION__, LOGLV_INFO, "Successfully read config param %s from %s: %s", string_param, filename, out_str_value);
+	}
+	if (APPCFG_GetConfigNumericParamFromFile(filename, numeric_param, &out_num_value, sizeof(out_num_value))) {
+		APPLOG_Log(__FUNCTION__, LOGLV_ERROR, "Failed retreiving %s from %s", numeric_param, filename);
+	}
+	else {
+		APPLOG_Log(__FUNCTION__, LOGLV_INFO, "Successfully read config param %s from %s: %d", numeric_param, filename, out_num_value);
+	}
+}
+
+void timer_callback(int sig, siginfo_t *si, void *uc)
+{
+	int number = *(int*) si->si_value.sival_ptr;
+	APPLOG_Log(__FUNCTION__, LOGLV_INFO, "Timer went off. Set new timer counting from: %d", number);
+	TIMER_SetTime(&p_timer_id, number);
+}
+
 /**
  * @brief The main function
  * @param[in] argc the number of command-line arguments
@@ -89,10 +123,19 @@ int main(int argc, const char **argv)
 		free(version);
 	}
 
-	//starting threads here ...
+	// Timer create
+	p_timer_id = malloc(sizeof(timer_t));
+	int p_param = 2;
+	TIMER_CreateTimer(&p_timer_id, 5, &p_param, &timer_callback);
 
+	//starting threads here ...
 	APPLOG_LogDebug( fn, LOGBIT_DEBUG, "debugmessage");
 	APPLOG_Log( fn, LOGLV_INFO, "The program has started. Use CTRL-C for stopping.");
+
+	ReadConfig();
+
+	
+
 	while( 0 == IGAPP_done) {
 		sleep(1);
 	}
