@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* project specific includes - if possible alphabetically ordered */
 #include "../common/log.h"
@@ -23,7 +24,8 @@
 #include "../common/version.h"
 #include "../common/timers.h"
 
-timer_t p_timer_id;
+timer_t p_timer_id1;
+timer_t p_timer_id2;
 
 /**
  * @brief Signal handler that terminates the application.
@@ -89,13 +91,18 @@ void ReadConfig()
 	}
 }
 
-void timer_callback(int sig, siginfo_t *si, void *uc)
+void timer_callback1(int sig, siginfo_t *si, void *uc)
 {
 	int number = *(int*) si->si_value.sival_ptr;
 	APPLOG_Log(__FUNCTION__, LOGLV_INFO, "Timer went off. Set new timer counting from: %d", number);
-	TIMER_SetTime(&p_timer_id, number);
+	TIMER_SetTime(p_timer_id1, number);
 }
-
+void timer_callback2(int sig, siginfo_t *si, void *uc)
+{
+	int number = *(int*) si->si_value.sival_ptr;
+	APPLOG_Log(__FUNCTION__, LOGLV_INFO, "Timer went off. Set new timer counting from: %d", number);
+	TIMER_SetTime(p_timer_id2, number);
+}
 /**
  * @brief The main function
  * @param[in] argc the number of command-line arguments
@@ -124,9 +131,12 @@ int main(int argc, const char **argv)
 	}
 
 	// Timer create
-	p_timer_id = malloc(sizeof(timer_t));
-	int p_param = 2;
-	TIMER_CreateTimer(&p_timer_id, 5, &p_param, &timer_callback);
+	p_timer_id1 = malloc(sizeof(timer_t));
+	p_timer_id2 = malloc(sizeof(timer_t));
+	int p_param1 = 4;
+	int p_param2 = 5;
+	TIMER_CreateTimer(&p_timer_id1, 2, &p_param1, &timer_callback1);
+	TIMER_CreateTimer(&p_timer_id2, 2, &p_param2, &timer_callback2);
 
 	//starting threads here ...
 	APPLOG_LogDebug( fn, LOGBIT_DEBUG, "debugmessage");
