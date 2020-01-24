@@ -131,6 +131,7 @@ int main(int argc, const char **argv)
 	}
 
 	// Timer create
+	TIMER_Init();
 	p_timer_id1 = malloc(sizeof(timer_t));
 	p_timer_id2 = malloc(sizeof(timer_t));
 	int p_param1 = 4;
@@ -152,6 +153,7 @@ int main(int argc, const char **argv)
 
 	APPLOG_Log( fn, LOGLV_INFO, "Interruption signal received. Stop APP.");
 	// project breakdown ...
+	TIMER_Breakdown();
 	APPLOG_Breakdown();
 	rv = 0;
 	sleep(1);

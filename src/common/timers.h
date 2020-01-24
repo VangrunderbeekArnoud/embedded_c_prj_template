@@ -18,14 +18,22 @@
 
 /* module specific includes (skeleton) - if possible alphabetically ordered */
 #include <time.h>
-
 /* component include */
 #include "timers_t.h"
 
 /* ----------------------------------------------------------------------
  * function declaration section
  * ----------------------------------------------------------------------*/
-
+/**
+ * @brief Initializes the timer object array
+ * @return true on success, false on failure
+ */
+bool TIMER_Init(void);
+/** 
+ * @brief Destroy the TIMER component.
+ * @return true if the breakdown was successful, false otherwise.
+ */
+bool TIMER_Breakdown(void);
 /**
  * @brief Create Timer
  * @param[out] p_timer_id the address where to return the ID of the created timer
