@@ -35,11 +35,11 @@ void APPVER_PrintSoftwareVersion();
 /**
  * @brief prints the svn version number
  */
-void APPVER_PrintSvnVersion();
+void APPVER_PrintGitHash();
 /**
  * @brief prints the current svn branch
  */
-void APPVER_PrintSvnBranch();
+void APPVER_PrintGitBranch();
 /**
  * @brief prints the current build number
  */

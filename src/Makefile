@@ -1,119 +1,218 @@
 # @file Makefile
 # @brief project GNU-Make Makefile
 # @code{.ebp}
+# @author Arnoud Vangrunderbeek
 # rules:
 # @encode
 
 # CREATE MISSING DIRS
-dir_guard			= @mkdir -p $(@D)
+dir_guard				= @mkdir -p $(@D);
 
-# MODULE SOURCE/OBJS DIRS
-COMMON_DIR			= common
-APP_DIR				= app
+RCM_RELEASE_NAME		= RCMsx
+RCM_CONFIG_FILE			= rcm.conf
 
-# OBJECTS
-OBJS_COMMON			= log.o version.o argparse.o config.o timers.o
-OBJS_APP				= app.o
+APP_PATH				= app
+COMMON_PATH				= common
 
-OBJS 					= $(addprefix $(COMMON_DIR)/, $(OBJS_COMMON))\
-						  $(addprefix $(APP_DIR)/, $(OBJS_APP))
+APP_OBJS				= app.o
+COMMON_OBJS				= log.o version.o argparse.o config.o timers.o
 
-OBJS_NO_PATH		= $(OBJS_COMMON) $(OBJS_APP)
+OBJS_RCM				= $(addprefix $(APP_PATH)/, $(APP_OBJS))\
+					  	  $(addprefix $(COMMON_PATH)/, $(COMMON_OBJS))
 
-# LIBRARIES
+OBJS_NO_PATH			= $(APP_OBJS) $(COMMON_OBJS)
+VPATH 					= $(APP_PATH):$(COMMON_PATH)
+
+MAJ_VER					= 00
+MIN_VER					= 01
+DEV_VER					= $$(cat $(BUILD_NUMBER_FILE))
+BUILD_NUMBER_FILE		= .build_number
+BUILD_NUMBER			= $$(cat $(BUILD_NUMBER_FILE) | xargs printf "%03d")
+BUILD_DATE				= $$(date +'%Y.%m.%d')
+GIT_HASH				= $$(git log -1 --pretty=format:"%H")
+GIT_BRANCH				= $$(git log -1 --pretty=format:"%D" | awk '{print $$3}' | sed 's/.$$//')
+
+BIN_PATH				= ../bin
+LIB_PATH				= ../lib
+TARGET_PATH				= $(BIN_PATH)/target
+ARM_PATH 				= $(TARGET_PATH)/rcm
+LNX_PATH 				= $(TARGET_PATH)/linux
+ARM_PATH_RELEASE		= $(ARM_PATH)/release
+ARM_PATH_DEBUG			= $(ARM_PATH)/debug
+LNX_PATH_RELEASE		= $(LNX_PATH)/release
+LNX_PATH_DEBUG			= $(LNX_PATH)/debug
+
+ARM_LIB_PATH			= $(LIB_PATH)/armv7l
+ARM_RELEASE_RCM			= $(ARM_PATH_RELEASE)/$(RCM_RELEASE_NAME)
+ARM_RELEASE_OBJS_PATH	= $(ARM_PATH_RELEASE)/objs
+ARM_RELEASE_DEPS_PATH	= $(ARM_PATH_RELEASE)/deps
+ARM_RELEASE_RCM_CONFIG	= $(ARM_PATH_RELEASE)/$(RCM_CONFIG_FILE)
+ARM_DEBUG_RCM			= $(ARM_PATH_DEBUG)/$(RCM_RELEASE_NAME)
+ARM_DEBUG_OBJS_PATH		= $(ARM_PATH_DEBUG)/objs
+ARM_DEBUG_DEPS_PATH		= $(ARM_PATH_DEBUG)/deps
+ARM_DEBUG_RCM_CONFIG	= $(ARM_PATH_DEBUG)/$(RCM_CONFIG_FILE)
+
+LNX_LIB_PATH			= $(LIB_PATH)/i686
+LNX_RELEASE_RCM			= $(LNX_PATH_RELEASE)/$(RCM_RELEASE_NAME)
+LNX_RELEASE_OBJS_PATH	= $(LNX_PATH_RELEASE)/objs
+LNX_RELEASE_DEPS_PATH	= $(LNX_PATH_RELEASE)/deps
+LNX_RELEASE_RCM_CONFIG	= $(LNX_PATH_RELEASE)/$(RCM_CONFIG_FILE)
+LNX_DEBUG_RCM			= $(LNX_PATH_DEBUG)/$(RCM_RELEASE_NAME)
+LNX_DEBUG_OBJS_PATH		= $(LNX_PATH_DEBUG)/objs
+LNX_DEBUG_DEPS_PATH		= $(LNX_PATH_DEBUG)/deps
+LNX_DEBUG_RCM_CONFIG	= $(LNX_PATH_DEBUG)/$(RCM_CONFIG_FILE)
+
+ARM_COMPILER			= arm-linux-gcc
+ARM_LINKER				= arm-linux-gcc
+LNX_COMPILER			= gcc
+LNX_LINKER				= gcc
+
 LIBS					= -lpthread -lrt
-LIBS_PATH			= /usr/lib/gcc/i686-redhat-linux/9/include
 
-# OBJECTS ROOT PATH
-OBJS_PATH			= ../build/objs
+CFLAGS					= -c -Wall -D_GNU_SOURCE
+CFLAGS_DEBUG			= -g -ggdb
+CFLAGS_RCM				= -DMAJ_VER=$(MAJ_VER) -DMIN_VER=$(MIN_VER) -DDEV_VER=$(DEV_VER) 
+CFLAGS_RCM				+= -DBUILD_DATE=$(BUILD_DATE) -DBUILD_NUMBER=$(DEV_VER)
+CFLAGS_RCM				+= -DGIT_HASH=$(GIT_HASH) -DGIT_BRANCH=$(GIT_BRANCH)
 
-# DEPS FILES PATH
-DEPS_PATH			= ../build/deps
+COLOR_NO				= \e[0m
+COLOR_OK				= \e[1;32m
+COLOR_ERROR				= \e[31m
+COLOR_WARNING			= \e[33m
+STRING_OK				= $(COLOR_OK)[OK]$(COLOR_NO)
+STRING_ERROR			= $(COLOR_ERROR)[ERROR]$(COLOR_NO)
+STRING_WARNING			= $(COLOR_WARNING)[WARNING]$(COLOR_NO)
 
-# CONFIG FILES
-APP_CONFIG_FILE	= app.cfg
+CCLOG 					= .cc.log
+CCERROR 				= .cc.error
 
-# RELEASE NAME
-RELEASE_NAME		= main
+log_status:= @if test -e $(CCERROR); \
+	then echo -e "\t\t$(STRING_ERROR)\n" && cat $(CCLOG) && rm -f $(CCLOG) $(CCERROR); echo -e "\n"; \
+	elif test -s $(CCLOG); then echo -e "\t\t$(STRING_WARNING)\n" && cat $(CCLOG) && rm -f $(CCLOG); echo -e "\n"; \
+	else echo -e "\t\t$(STRING_OK)" && rm -f $(CCLOG); fi;
 
-# VERSION SPECIFICS
-MAJ_VER=0
-MIN_VER=0
-DEV_VER=1
-BUILD_NUMBER=$$(date +'%y%m%d%H%M')
-BUILD_DATE=$$(date +'%Y.%m.%d')
+increment_build_number:= @if ! test -e $(CCERROR); \
+	then echo $$(($$(cat $(BUILD_NUMBER_FILE))+1)) > $(BUILD_NUMBER_FILE); fi;
 
-# TARGETS
-TARGET_REL_PATH	= ../build/release
-TARGET_DEB_PATH 	= ../build/debug
-TARGET_RELEASE		= $(TARGET_REL_PATH)/$(RELEASE_NAME)
-TARGET_DEBUG		= $(TARGET_DEB_PATH)/$(RELEASE_NAME)
-CONF_FILES_RELEASE= $(addprefix $(TARGET_REL_PATH)/, $(APP_CONFIG_FILE))
-CONF_FILES_DEBUG	= $(addprefix $(TARGET_DEB_PATH)/, $(APP_CONFIG_FILE))
-
-# SRC SEARCH PATHS
-VPATH = $(COMMON_DIR):$(APP_DIR):
-
-# TOOLS
-COMPILER				= gcc
-LINKER				= gcc
-
-# CFLAGS
-CFLAGS				= -c -Wall -D_GNU_SOURCE
-CFLAGS				+= -DMAJ_VER=$(MAJ_VER) -DMIN_VER=$(MIN_VER) -DDEV_VER=$(DEV_VER) 
-CFLAGS				+= -DBUILD_DATE=$(BUILD_DATE) -DBUILD_NUMBER=$(BUILD_NUMBER)
-
+append_build_number:= @if ! test -e $(CCERROR); \
+	then mv $(ARM_RELEASE_RCM) $(ARM_RELEASE_RCM)_b$(BUILD_NUMBER); fi;
 
 # RULES FOR GENERATING DEPENDENCIES
-$(DEPS_PATH)/%.d: %.c
-	@echo Make deps for $<
+$(ARM_RELEASE_DEPS_PATH)/%.d: %.c
 	$(dir_guard)
-	@set -e; rm -f $@; \
-	$(COMPILER) -MM $(CFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,$(OBJS_PATH)/\1.o $@ : Makefile ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
+	@printf "generating dependency file %50s" "$@"
+	@set -e; $(ARM_COMPILER) -MM $(CFLAGS) $(CFLAGS_RCM) $< > $@.$$$$
+	@echo -e "\t\t$(STRING_OK)"
+
+$(ARM_DEBUG_DEPS_PATH)/%.d: %.c
+	$(dir_guard)
+	@printf "generating dependency file %50s\t" "$@"
+	@set -e; $(ARM_COMPILER) -MM $(CFLAGS) $(CFLAGS_DEBUG) $(CFLAGS_RCM) $< > $@.$$$$
+	@echo -e "\t$(STRING_OK)"
+
+$(LNX_RELEASE_DEPS_PATH)/%.d: %.c
+	$(dir_guard)
+	@printf "generating dependency file %50s" "$@"
+	@set -e; $(LNX_COMPILER) -MM $(CFLAGS) $(CFLAGS_RCM) $< > $@.$$$$
+	@echo -e "\t\t$(STRING_OK)"
+
+$(LNX_DEBUG_DEPS_PATH)/%.d: %.c
+	$(dir_guard)
+	@printf "generating dependency file %50s" "$@"
+	@set -e; $(LNX_COMPILER) -MM $(CFLAGS) $(CFLAGS_DEBUG) $(CFLAGS_RCM) $< > $@.$$$$
+	@echo -e "\t\t$(STRING_OK)"
+
 
 # COMPILER RULES
-$(OBJS_PATH)/$(COMMON_DIR)/%.o: $(DEPS_PATH)/%.d
+$(ARM_RELEASE_OBJS_PATH)/$(APP_PATH)/%.o: $(ARM_RELEASE_DEPS_PATH)/%.d
 	$(dir_guard)
-	$(COMPILER) $(CFLAGS) $(COMMON_DIR)/$*.c -o $@
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(ARM_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(APP_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
 
-$(OBJS_PATH)/$(APP_DIR)/%.o: $(DEPS_PATH)/%.d
+$(ARM_RELEASE_OBJS_PATH)/$(COMMON_PATH)/%.o: $(ARM_RELEASE_DEPS_PATH)/%.d
 	$(dir_guard)
-	$(COMPILER) $(CFLAGS) $(APP_DIR)/$*.c -o $@
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(ARM_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(COMMON_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(ARM_DEBUG_OBJS_PATH)/$(APP_PATH)/%.o: $(ARM_DEBUG_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(ARM_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(CFLAGS_DEBUG) $(APP_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(ARM_DEBUG_OBJS_PATH)/$(COMMON_PATH)/%.o: $(ARM_DEBUG_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(ARM_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(CFLAGS_DEBUG) $(COMMON_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(LNX_RELEASE_OBJS_PATH)/$(APP_PATH)/%.o: $(LNX_RELEASE_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(LNX_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(APP_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(LNX_RELEASE_OBJS_PATH)/$(COMMON_PATH)/%.o: $(LNX_RELEASE_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(LNX_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(COMMON_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(LNX_DEBUG_OBJS_PATH)/$(APP_PATH)/%.o: $(LNX_DEBUG_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(LNX_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(CFLAGS_DEBUG) $(APP_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
+
+$(LNX_DEBUG_OBJS_PATH)/$(COMMON_PATH)/%.o: $(LNX_DEBUG_DEPS_PATH)/%.d
+	$(dir_guard)
+	@printf "generating object file     %50s" "$@"
+	@set -e; $(LNX_COMPILER) $(CFLAGS) $(CFLAGS_RCM) $(CFLAGS_DEBUG) $(COMMON_PATH)/$*.c -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
 
 # LINKER RULES
-$(TARGET_RELEASE): $(addprefix $(OBJS_PATH)/, $(OBJS))
+$(ARM_RELEASE_RCM): $(addprefix $(ARM_RELEASE_OBJS_PATH)/, $(OBJS_RCM))
 	$(dir_guard)
-	$(LINKER) $^ $(LIBS) -o $@
+	@printf "generating target file     %50s" "$@"
+	@set -e; $(ARM_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(append_build_number)
+	$(increment_build_number)
+	$(log_status)
 
-$(TARGET_DEBUG): $(addprefix $(OBJS_PATH)/, $(OBJS))
+$(ARM_DEBUG_RCM): $(addprefix $(ARM_DEBUG_OBJS_PATH)/, $(OBJS_RCM))
 	$(dir_guard)
-	$(LINKER) $^ $(LIBS) -o $@
+	@printf "generating target file     %50s" "$@"
+	@set -e; $(ARM_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
 
-# CONFIG FILES
-$(TARGET_REL_PATH)/%.cfg: $(APP_DIR)/$(APP_CONFIG_FILE)
-	cp -f $^ $@
+$(LNX_RELEASE_RCM): $(addprefix $(LNX_RELEASE_OBJS_PATH)/, $(OBJS_RCM))
+	$(dir_guard)
+	@printf "generating target file     %50s" "$@"
+	@set -e; $(LNX_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
 
-$(TARGET_DEB_PATH)/%.cfg: $(APP_DIR)/$(APP_CONFIG_FILE)
-	cp -f $^ $@
+$(LNX_DEBUG_RCM): $(addprefix $(LNX_DEBUG_OBJS_PATH)/, $(OBJS_RCM))
+	$(dir_guard)
+	@printf "generating target file     %50s" "$@"
+	@set -e; $(LNX_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	$(log_status)
 
-# PULL DEPENDENCIES
--include $(addprefix $(DEPS_PATH)/, $(OBJS_NO_PATH:.o=.d))
 .SECONDARY: $(OBJS_NO_PATH:.o=.d)
 
-# MAIN RULES
-all: $(TARGET_RELEASE) $(CONFIG_FILES_RELEASE)
+.DEFAULT_GOAL:= arm_release_rcm
 
-debug: CFLAGS += -DDEBUG -g
-debug: $(TARGET_DEBUG) $(CONFIG_FILES)
+arm_release_rcm: $(ARM_RELEASE_RCM)
+
+arm_debug_rcm: $(ARM_DEBUG_RCM)
+
+lnx_release_rcm: $(LNX_RELEASE_RCM)
+
+lnx_debug_rcm: $(LNX_DEBUG_RCM)
+
+all: arm_release_rcm arm_debug_rcm lnx_release_rcm lnx_debug_rcm
 
 clean:
-	rm -R -f $(OBJS_PATH)
 	rm -R -f $(TARGET_PATH)
-	rm -R -f $(DEPS_PATH)
-
-
-
-
 

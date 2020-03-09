@@ -13,22 +13,22 @@
 #define str(s) #s
 
 #ifndef MAJ_VER
-#define MAJ_VER 00
+#define MAJ_VER 0
 #endif
 #ifndef MIN_VER
-#define MIN_VER 00
+#define MIN_VER 0
 #endif
 #ifndef DEV_VER
-#define DEV_VER 00
+#define DEV_VER 0
 #endif
-#ifndef SVN_VER
-#define SVN_VER unknown
+#ifndef GIT_HASH
+#define GIT_HASH unknown
 #endif
-#ifndef SVN_BRANCH
-#define SVN_BRANCH unknown
+#ifndef GIT_BRANCH
+#define GIT_BRANCH unknown
 #endif
 #ifndef BUILD_NUMBER
-#define BUILD_NUMBER unknown
+#define BUILD_NUMBER 0
 #endif
 #ifndef BUILD_DATE
 #define BUILD_DATE unknown
@@ -51,9 +51,9 @@
 const volatile static int maj_ver = MAJ_VER;
 const volatile static int min_ver = MIN_VER;
 const volatile static int dev_ver = DEV_VER;
-const static char* svn_ver = xstr(SVN_VER);
-const static char* svn_branch = xstr(SVN_BRANCH);
-const static char* build_number = xstr(BUILD_NUMBER);
+const static char* git_hash = xstr(GIT_HASH);
+const static char* git_branch = xstr(GIT_BRANCH);
+const volatile static int build_number = BUILD_NUMBER;
 const static char* build_date = xstr(BUILD_DATE);
 
 

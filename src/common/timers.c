@@ -81,7 +81,8 @@ bool TIMER_Init(void)
 	if (TIMER_is_init) {
 		APPLOG_Log(__FUNCTION__, LOGLV_WARNING, "TIMER component already initialized");
 	} else {
-		for (int i = 0; i < TIMER_MAX; i++) {
+		int i;
+		for (i = 0; i < TIMER_MAX; i++) {
 			TIMER_Instances[i].timer_id = NULL;
 			TIMER_Instances[i].signum = TIMER_MIN+i;
 		}
@@ -97,7 +98,8 @@ bool TIMER_Breakdown(void)
 	if (!TIMER_is_init) {
 		APPLOG_Log(__FUNCTION__, LOGLV_ERROR, "TIMER component not initialized");
 	} else {
-		for (int i = 0; i < TIMER_MAX; i++) {
+		int i;
+		for (i = 0; i < TIMER_MAX; i++) {
 			if (TIMER_Instances[i].timer_id !=NULL) {
 				TIMER_DisposeTimer(TIMER_Instances[i].timer_id);
 				TIMER_Instances[i].timer_id = NULL;
@@ -112,8 +114,8 @@ bool TIMER_Breakdown(void)
 /* ------------------------------------------------------------------------- */
 static int TIMER_GetIndex(const timer_t* p_timer_id, int* p_index)
 {
-	int rv = -1;
-	for (int i = 0; i < TIMER_MAX; i++) {
+	int rv = -1, i;
+	for (i = 0; i < TIMER_MAX; i++) {
 		if (*p_timer_id == TIMER_Instances[i].timer_id) {
 			*p_index = i;
 			rv = 0;
@@ -135,7 +137,8 @@ static bool TIMER_Exists(timer_t* p_timer_id)
 static struct TIMER_s* TIMER_GetFreeTimerObject()
 {
 	struct TIMER_s* TimerObject;
-	for (int i = 0; i <= TIMER_MAX; i++) {
+	int i;
+	for (i = 0; i <= TIMER_MAX; i++) {
 		if (TIMER_Instances[i].timer_id == NULL) { 
 			TimerObject = &TIMER_Instances[i];
 			break;
