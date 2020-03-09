@@ -9,7 +9,7 @@
 dir_guard				= @mkdir -p $(@D);
 
 RCM_RELEASE_NAME		= RCMsx
-RCM_CONFIG_FILE			= rcm.conf
+RCM_CONFIG_FILE			= config.cfg
 
 APP_PATH				= app
 COMMON_PATH				= common
@@ -179,24 +179,28 @@ $(ARM_RELEASE_RCM): $(addprefix $(ARM_RELEASE_OBJS_PATH)/, $(OBJS_RCM))
 	@set -e; $(ARM_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
 	$(append_build_number)
 	$(increment_build_number)
+	@cp $(RCM_CONFIG_FILE) $(ARM_PATH_RELEASE)
 	$(log_status)
 
 $(ARM_DEBUG_RCM): $(addprefix $(ARM_DEBUG_OBJS_PATH)/, $(OBJS_RCM))
 	$(dir_guard)
 	@printf "generating target file     %50s" "$@"
 	@set -e; $(ARM_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	@cp $(RCM_CONFIG_FILE) $(ARM_PATH_DEBUG)
 	$(log_status)
 
 $(LNX_RELEASE_RCM): $(addprefix $(LNX_RELEASE_OBJS_PATH)/, $(OBJS_RCM))
 	$(dir_guard)
 	@printf "generating target file     %50s" "$@"
 	@set -e; $(LNX_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	@cp $(RCM_CONFIG_FILE) $(LNX_PATH_RELEASE)
 	$(log_status)
 
 $(LNX_DEBUG_RCM): $(addprefix $(LNX_DEBUG_OBJS_PATH)/, $(OBJS_RCM))
 	$(dir_guard)
 	@printf "generating target file     %50s" "$@"
 	@set -e; $(LNX_LINKER) $^ $(LIBS) -o $@ 2> $(CCLOG) || touch $(CCERROR)
+	@cp $(RCM_CONFIG_FILE) $(LNX_PATH_DEBUG)
 	$(log_status)
 
 .SECONDARY: $(OBJS_NO_PATH:.o=.d)
